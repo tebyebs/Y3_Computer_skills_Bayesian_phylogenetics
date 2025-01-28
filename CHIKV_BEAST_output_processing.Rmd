@@ -63,7 +63,7 @@ The next step is to load the file into R. This function imports the tree by firs
 
 ```{r}
 # Load the MCC tree
-beast_file <- ("/Users/rhysinward/Downloads/MCC_CHIKV_IndianOcean.tree")
+beast_file <- ("/MCC_trees/MCC_CHIKV_IndianOcean.tree")
 beast_tree <- treeio::read.beast(beast_file)
 ```
 
@@ -208,7 +208,7 @@ Phylogenetic trees are a powerful graphical tool to describe the spread of a pat
 BEAST analyses produce a file which registers the estimates of different parameters during the estimation of the tree, called a .log file. We will import the log file (which has been converted to a comma delimited file) and look at the first few lines of the file.
 
 ```{r}
-beast_log <- read.csv("/Users/rhysinward/Downloads/CHIKV_IndianOcean_BEAST_output_log.csv")
+beast_log <- read.csv("MCMC_log_files/CHIKV_IndianOcean_BEAST_output_log.csv")
 head(beast_log)
 ```
 
