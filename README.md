@@ -12,4 +12,7 @@ Y3_Computer_skills_Bayesian_phylogenetics/
 ├── MCMC_log_files
 │   ├── CHIKV_IndianOcean_BEAST_output_log.csv
 │   └── CHIKV_IndianOcean_updated_BEAST_output_log.csv
+├── Raw_files
+│   ├── CHIKV_IndianOcean_metadata.csv
+│   └── CHIKV_IndianOcean_updated_metadata.csv
 └── CHIKV_BEAST_output_processing.Rmd
