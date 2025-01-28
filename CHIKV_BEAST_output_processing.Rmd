@@ -35,11 +35,7 @@ required_packages <-c("rmarkdown", "tinytex", "tidyverse", "ggtree",
 
 We will be looking at data from a Chikungunya virus outbreak in the city of Kassala, Sudan. As described on your problem sheet, a collection of viral genome sequences were produced during the outbreak, and a phylogeny was produced that contains other genomic sequences from past epidemics in the region. The date when the samples were collected is included in the model, to produce a phylogenetic tree where branch lengths are proportional to the times when different lineages split within the tree. This will allow us to infer three important pieces of information for the epidemic: i. how long has CHIKV been circulating in Sudan prior to the outbreak, ii. how many independent importations of the virus into Kassala drove the epidemic, and iii. which are the possible sources for these importations.
 
-As with any other R session, we will first set our working directory to ensure we import files located in the correct folder.
-
-```{r}
-setwd(getwd())
-```
+As with any other R session, we will first set our working directory to ensure we import files located in the correct folder. Make sure you do this on your own.
 
 We will then load the libraries that will be used for these analyses
 
@@ -63,7 +59,7 @@ The next step is to load the file into R. This function imports the tree by firs
 
 ```{r}
 # Load the MCC tree
-beast_file <- ("/MCC_trees/MCC_CHIKV_IndianOcean.tree")
+beast_file <- ("MCC_trees/MCC_CHIKV_IndianOcean.tree")
 beast_tree <- treeio::read.beast(beast_file)
 ```
 
