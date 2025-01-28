@@ -1,0 +1,303 @@
+---
+title: "Processing Bayesian phylogenetic inference outputs and interpreting trees in R"
+output:
+  pdf_document: default
+  html_document: default
+---
+\vspace{-3em}
+January 2025 \  
+
+Convenor: Dr Bernardo Gutierrez [bernardo.gutierrez@biology.ox.ac.uk](mailto:bernardo.gutierrez@biology.ox.ac.uk) 
+\
+Demonstrator: Rhys Inward [rhys.inward@biology.ox.ac.uk](mailto:rhys.inward@biology.ox.ac.uk)
+
+\
+
+**1. INTRODUCTION**
+
+Infectious disease epidemiology has become increasingly reliant in the use of pathogen genetic data to understand how epidemics unfold and progress over space and time. One of the main tools used for this purpose is phylogenetics: the use of graphical representations of bifurcating processes (which we call phylogenetic trees, or just 'trees' for short) that show the evolutionary relationships between organisms. While phylogenetics emerged as a way to describe evolutionary relationships between different taxa (e.g., different plant or animal species over the course of thousands of years of biological evolution), the rapid evolutionary rate of some pathogens (mostly viruses) permits the use of the same approach to draw more recent evolutionary relationships that emerge within a single epidemic (over the course of weeks/months). As a virus spreads during an outbreak and accumulates genetic change during this time, we can take the genetic information from viruses within infected patients to infer trees that represent the history of the outbreak itself.
+
+This practical will focus on a specific type of method used to infer phylogenetic trees called Bayesian phylogenetics. Multiple specialised pieces of software exist that take the genetic data and infer trees, which can use different statistical approaches. We will focus on a program that uses Bayesian inference called **BEAST (Bayesian Evolutionary Analysis Sampling Trees)**, which is used routinely for viral genomic epidemiology. You can find excellent [online resources and tutorials on how to use BEAST](https://beast.community), so this practical will focus on processing, understanding and interpreting BEAST output. Since phylogenetics is a highly visual analytical approach, we will also focus on ways to visualise the data which can aid in interpreting and presenting results. You will learn how to work with R packages that process different data types (specifically to input data from both phylogenetic inference and from Bayesian inference in general) and that allow for the visualisation of this data in a comprehensive and accurate way. The data types themselves will be familiar to you, as they encompass either phylogenies or data frames. 
+
+**Overview of the packages we'll use:** 
+
+```{r packages}
+required_packages <-c("rmarkdown", "tinytex", "tidyverse", "ggtree",
+"ggridges", "treeio", "coda", "cols4all")
+```
+
+**Importing phylogenetic trees**: While in a previous practical you used APE to upload and handle trees, we will use functions from two packages, ggtree and treeio, to import and visualise phylogenies here. In particular, ggtree is built as a visualisation tool (based on the popular ggplot package) and can be useful when looking at trees with large amounts of associated metadata.
+
+**Importing and processing MCMC output**: The coda package is specifically tailored to process the output from Markov Chain Monte Carlo simulations, an algorithm used in general Bayesian inference to explore probability space. Here, we will use it to import and analyse the estimates of important parameters produced jointly with the phylogenetic trees by BEAST.
+
+\
+**2. IMPORTING AND VISUALISING A BEAST TREE**
+
+We will be looking at data from a Chikungunya virus outbreak in the city of Kassala, Sudan. As described on your problem sheet, a collection of viral genome sequences were produced during the outbreak, and a phylogeny was produced that contains other genomic sequences from past epidemics in the region. The date when the samples were collected is included in the model, to produce a phylogenetic tree where branch lengths are proportional to the times when different lineages split within the tree. This will allow us to infer three important pieces of information for the epidemic: i. how long has CHIKV been circulating in Sudan prior to the outbreak, ii. how many independent importations of the virus into Kassala drove the epidemic, and iii. which are the possible sources for these importations.
+
+As with any other R session, we will first set our working directory to ensure we import files located in the correct folder.
+
+```{r}
+setwd(getwd())
+```
+
+We will then load the libraries that will be used for these analyses
+
+```{r setup, message=FALSE, warning=FALSE, results='hide'}
+# List of required packages
+required_packages <- c(
+  "rmarkdown", "tinytex", "tidyverse", "ggtree", 
+  "ggridges", "treeio", "coda", "cols4all")
+
+# Install missing packages
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[,"Package"])]
+if(length(missing_packages)) {
+  install.packages(missing_packages)
+}
+
+# Load libraries
+lapply(required_packages, library, character.only = TRUE)
+```
+
+The next step is to load the file into R. This function imports the tree by first defining the folder where the tree is located and then reading it.
+
+```{r}
+# Load the MCC tree
+beast_file <- ("/Users/rhysinward/Downloads/MCC_CHIKV_IndianOcean.tree")
+beast_tree <- treeio::read.beast(beast_file)
+```
+
+We can then produce a simple version of the tree by executing:
+
+```{r}
+# Plot the base tree
+ggtree(beast_tree)
+```
+
+Note that the general shape of the tree has some similarities to other trees that you have probably seen in the past. The graph is interpreted from right to left; the end of the branches to the right of the plot are the tips of the tree, and each one represents one viral genome sequence, either collected from the Kassala outbreak or other outbreaks in different countries. Something which is not immediately obvious is the meaning of the branch lengths, the distance between nodes in the tree (from left to right). For many phylogenetic trees these lengths correspond to the degree of genetic change (that is, the number of genetic changes inferred to have ocurred between nodes, taken as a measure of the numbers of mutations). This particular tree used a molecular clock model to convert these branch lengths from genetic distances to calendar time. To visualise this, we will add a timescale to the plot.
+
+```{r}
+# Add temporal scale
+ggtree(beast_tree, mrsd = "2018-10-16") + theme_tree2()
+```
+
+With this scale, it is easy to see that the tree shows the evolution of a CHIKV lineage over the course of more than a decade. From the description of the outbreak on your worksheet, thinking of the dates when the Kassala samples were likely collected, which part of the tree is likely to represent the Kassala outbreak?
+
+A simple trick to facilitate visualisation is to add guide lines and a custom timescale.
+
+```{r}
+# Add grid lines
+ggtree(beast_tree, mrsd = "2018-10-16") + theme_tree2() +
+  scale_x_continuous(
+    breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+    minor_breaks = seq(2004, 2019, 1)
+  ) +
+  theme(
+    panel.grid.major = element_line(color = "black", size = .1),
+    panel.grid.minor = element_line(color = "grey", size = .1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+Now we have markers for every year represented in the tree. With these additional guidelines, you may also start looking at the persistence time of different lineages and parts of the tree. How would you interpret the longer branches on the tree?
+
+Ultimately, a tree like this cannot be interpreted without additional information. A simple piece of information to include is the names of the sequences at the tree tips which, depending on the naming convention, can include the location where they were collected and the date when they were collected. We can show these by executing the folllowing code:
+
+```{r}
+# Add sequence names
+ggtree(beast_tree, mrsd = "2018-10-16") + theme_tree2() + geom_tiplab(size = 1.5) +
+  scale_x_continuous(
+    breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+    minor_breaks = seq(2004, 2019, 1)
+  ) +
+  theme(
+    panel.grid.major = element_line(color = "black", size = .1),
+    panel.grid.minor = element_line(color = "grey", size = .1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+Trees with these many tips can be hard to read from the information on the tree tips simply due to space constrain: there's barely enough room to show all names on the page. You can use the geom_tiplab(size = 1.5) attribute to change the font size.
+
+Given the vast amount of information from this tree, it may be more sensible to use colours to visualise the features which you find meaningful of this phylogeny. Given that we are interested in the origin of the Kassala outbreak, a useful way to visualise this tree is to highlight the parts of the tree that correspond to this epidemics as opposed to other past epidemics, as such:
+
+```{r}
+# Colour the tree to show the Kassala outbreak lineage
+ggtree(beast_tree, aes(color = outbreak), mrsd = "2018-10-16") + theme_tree2() +
+  scale_x_continuous(
+    breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+    minor_breaks = seq(2004, 2019, 1)
+  ) +
+  theme(
+    panel.grid.major = element_line(color = "black", size = .1),
+    panel.grid.minor = element_line(color = "grey", size = .1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+With this visualisation, it becomes much clearer which parts of the tree we should be focused in. The Kassala clade represents the data from the outbreak we're investigating, and this representation makes it easier to read into the time when this epidemic began.
+
+You may have noticed that it is not only the tree tips which are coloured but rather branches and nodes. This type of reconstruction, where the locations of tree nodes (which are inferred ancestors to the sequences that branch out of these nodes) are inferred, is called phylogeography. Phylogeographic applications are common outside of genomic epidemiology, and in our case can provide information on the locations where viral lineages emerge and when these are introduced into new locations. This particular tree included a very simple method to infer the locations of the nodes called parsimony; more complex and statistically robust methods also exist and would be used during more systematic analyses. From this additional information, when is it likely that the Kassala outbreak started? How do you interpret the long branch at the base of the Kassala outbreak?
+
+\
+**3. IDENTIFYING NODES AND TRANSITIONS BETWEEN LOCATIONS** 
+
+Long branches in time-calibrated trees such as this can represent unobserved events from which no information is available concerning viral transmission. However, an important marker of a lineage of interest is the tree node which contains all the sequences of interest - in this case, all the sequences from the Kassala outbreak. These nodes are called Most Recent Common Ancestors (MRCAs). In genomic epidemiology, these are epidemiologically relevant because they can be used as a proxy for the earliest transmission event from which the descendant sequences emerged. Therefore, the MRCA inferred to have occurred within the same location as the rest of the sequences in an outbreak is an indicator of the time since the virus has likely been transmitting in our location of interest. For Kassala, it corresponds to this node.
+
+```{r}
+# Identify the MRCA of the Kassala outbreak
+ggtree(beast_tree, aes(color = outbreak), mrsd="2018-10-16") + theme_tree2() +
+  scale_x_continuous(breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+                     minor_breaks = seq(2004, 2019, 1)) +
+  geom_point2(aes(subset = (node == 255)), shape = 21, size = 3, fill = 'darkblue') +
+  theme(panel.grid.major = element_line(color = "black", size = .1),
+        panel.grid.minor = element_line(color = "grey", size = .1),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+It is possible that CHIKV has been circulating since earlier (which we could only infer if we had more Kassala sequences that attached to the tree along the long basal branch), but from the data that we do have we can be confident that this MRCA sets a limit backwards in time for when the virus was possibly introduced into Kassala.
+
+From this general interpretation, we will look in the following section how we can understand the uncertainty of these estimates. However, the tree contains more information than just the origins of the Kassala outbreak. The following command shows the tree with a full reconstruction of the circulation of this CHIKV lineage across the region surrounding Sudan.
+
+```{r}
+ggtree(beast_tree, aes(color = country), mrsd="2018-10-16") + theme_tree2() +
+  scale_x_continuous(breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+                     minor_breaks = seq(2004, 2019, 1)) +
+  scale_color_discrete_c4a_cat("classic20") +
+  theme(panel.grid.major = element_line(color = "black", size = .1),
+        panel.grid.minor = element_line(color = "grey", size = .1),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+Representing these large numbers of countries in a tree is visually challenging and can be hard to interpret. One of the reasons for this is that it is hard to make sense of large numbers of colours in a single plot. An additional challenge emerges when considering people with some degree of colour blindness; to facilitate the interpretability of trees and other plots with large numbers of dimensions, packages such as cols4all provide colour palettes which are friendly to different types of colour blindness. For more information, you can look at the package information.
+
+```{r}
+help("cols4all")
+```
+
+The tree above uses one of the palettes from cols4all to show different countries on the tree, but the large number of countries can still make interpretation tedious. Depending on the question of interest, you may want to group countries into meaningful regions, such as in the following tree:
+
+```{r}
+# Highlight spread between regions
+ggtree(beast_tree, aes(color = region), mrsd = "2018-10-16") + theme_tree2() +
+  scale_x_continuous(
+    breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+    minor_breaks = seq(2004, 2019, 1)
+  ) +
+  scale_color_discrete_c4a_cat("friendly7") +
+  theme(
+    panel.grid.major = element_line(color = "black", size = .1),
+    panel.grid.minor = element_line(color = "grey", size = .1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+By combining the concepts described above and the different approaches to annotating the geographic spread of CHIKV on the tree, you can provide a complete description in time of how the virus has spread and on the origin of the Kassala outbreak.
+
+\
+**4. PROCESSING THE POSTERIOR DISTRIBUTION FROM AN MCMC**
+
+Phylogenetic trees are a powerful graphical tool to describe the spread of a pathogen. Bayesian phylogenetics has an additional advantage, which is the joint estimation of important parameters from the model that conditions the tree inference. The phylogeny you've been exploring is the one that best fits the data (i.e., genetic sequences with their respective collection dates) given a particular evolutionary model. One of the parameters of this model, the molecular clock, defines the estimated ages for the nodes in the tree, including the root of the phylogeny (which is the origin of this CHIKV lineage) and the MRCA of the Kassala outbreak. Because Bayesian inference explores the distribution of values for these parameters that best fit the data for a particular tree, we can also look at the distribution of values for these important pieces of data surrounding the origin of the epidemic.
+
+BEAST analyses produce a file which registers the estimates of different parameters during the estimation of the tree, called a .log file. We will import the log file (which has been converted to a comma delimited file) and look at the first few lines of the file.
+
+```{r}
+beast_log <- read.csv("/Users/rhysinward/Downloads/CHIKV_IndianOcean_BEAST_output_log.csv")
+head(beast_log)
+```
+
+The column names represent different parameters from the evolutionary model, and individual lines correspond to specific steps in the MCMC run (from the slides, these are analogous to the "steps" our MCMC robot took while trying to find the optimal point in probability space). The column names joint is the overall posterior probability of the tree when accounting for all other parameters in the model. A useful way to visualise the MCMC path (i.e., the values sampled by our MCMC robot during its exploration of probability space) is through a trace plot, where the X axis registers the sequential steps the MCMC robot took and the Y axis contains the values sampled.
+
+```{r}
+coda::traceplot(as.mcmc(beast_log$joint))
+```
+
+The raw trace plot for the posterior probability shows that the early steps of our MCMC robot sampled values which were considerably low (LogL ~ -7000) compared to the values at later steps, when it settled around LogL ~ -2700. This behaviour is to be expected - remember that our robot starts in a somewhat random place on probability space, and slowly explores it until it arrives to what are ideally optimal values; once these values are attained, the robot is unlikely to leave this portion of probability space and will sample around the local optimum at very high densities. As we begin to exclude the first steps of the MCMC (i.e., remove the first steps), we get a better idea of the values that were sampled once the MCMC reached a stationary phase. Removing the first 10 000 steps of the MCMC produces this trace plot:
+
+```{r}
+coda::traceplot(as.mcmc(beast_log$joint[10:nrow(beast_log)]))
+```
+
+Removing the first 20 000 steps produces this trace plot:
+
+```{r}
+coda::traceplot(as.mcmc(beast_log$joint[20:nrow(beast_log)]))
+```
+
+Finally, removing the first 30 000 steps produces this trace plot:
+
+```{r}
+coda::traceplot(as.mcmc(beast_log$joint[30:nrow(beast_log)]))
+```
+
+We can see how, at this stage, the values are fairly stable with some variation. This trace plot propfile is informally known as a "fuzzy caterpillar", and it shows that this parameter has reached a point of convergence. For BEAST analyses, it is generally good practice to always remove the first 10% of the total of steps from the MCMC. These discarded steps are known as the burn-in, and amount to the time when the MCMC reached a stationary phase. We will create a new data frame with the burn-in removed.
+
+```{r}
+beast_log_burnin <- beast_log[floor(nrow(beast_log) * 0.1):nrow(beast_log),]
+coda::traceplot(as.mcmc(beast_log_burnin$joint))
+```
+
+Since this object contains samples from the probability space, we can plot them as a histogram to visualise the posterior distribution of a parameter. Here, instead of plotting the posterior probability, we will show an important parameter when reading the tree: the age of the Kassala outbreak MRCA.
+
+```{r}
+# Histogram
+beast_log_burnin |>
+  ggplot() +
+  geom_histogram(aes(age.Kassala_outbreak.), bins = 50, fill = "#88CCEE", color = "white") +
+  theme_classic()
+```
+
+A more appropriate representation is a density function, which shows the estimated (smoothed) distribution of values for this parmeter.
+
+```{r}
+# Density plot
+beast_log_burnin |>
+  ggplot(aes(age.Kassala_outbreak.)) +
+  geom_density(fill = "#88CCEE", alpha = 0.2) +
+  theme_classic()
+```
+
+Look back at the tree and the rough estimate for the age of the Kassala MRCA and compare to the posterior distribution for the same value. Do they match?
+
+The posterior distribution of a parameter estimate is an important indicator of the uncertainty related to this value. Similarly to how you would estimate a credible interval (e.g., 95% CI) for a distribution, a posterior probabiloity distribution can be read in a similar way by estimating the Highest Posterior Probability Density (HPD) - routinely the 95% HPD is a measure used to estimate the uncertainty around any parameter estimate. For the Kassala MRCA age, we can show it by using the following code:
+
+```{r}
+hpd <- paste0(round(HPDinterval(as.mcmc(beast_log_burnin$age.Kassala_outbreak.))[1], 2),
+              ", ",
+              round(HPDinterval(as.mcmc(beast_log_burnin$age.Kassala_outbreak.))[2], 2))
+
+beast_log_burnin |>
+  select(age.Kassala_outbreak.) |>
+  pivot_longer(cols = c("age.Kassala_outbreak."), names_to = "clade") |>
+  ggplot(aes(x = value, y = clade, fill = factor(stat(quantile)))) +
+  stat_density_ridges(geom = "density_ridges_gradient",
+                      calc_ecdf = TRUE,
+                      quantiles = c(0.025, 0.975),
+                      alpha = 0.2) +
+  scale_fill_manual(name = "Probability",
+                    values = c("#882255", "#88CCEE", "#882255"),
+                    labels = c("Lower 2.5% PD", "95% HPD", "Upper 2.5% PD")) +
+  scale_y_discrete(expand = expansion(add = c(.1, 2.5))) +
+  annotate("text", x = 2017, y = 2, label = hpd) +
+  theme_classic() + theme(axis.title.y = element_blank(),
+                          axis.text.y = element_blank(),
+                          axis.ticks.y = element_blank())
+```
+
+The HPDinterval() function in coda estimates the upper and lower 95% HPD values which have been plotted on the probability distribution. With this additional information, what can you conclude regarding the time of origin for the Kassala outbreak?
+
+Remember that this same procedure can be applied to any parameter from the .log file. Here for example, we will compare the age of the entire phylogeny (the root of the tree) and the MRCA of the Kassala outbreak using violin plots (which show the distribution of values and are useful when comparing different parameter estimates). What does this comparison show? Since the root of the tree shows a likely origin somewhere between African and the Indian Ocean islands, how long did it take for the virus to be re-introduced into Africa during the Sudan outbreak?
+
+```{r}
+beast_log_burnin |>
+  select(age.root., age.Kassala_outbreak.) |>
+  pivot_longer(cols = c("age.root.", "age.Kassala_outbreak."), names_to = "clade_age") |>
+  ggplot() + geom_violin(aes(x = value, y = clade_age)) +
+  theme_classic()
+```
