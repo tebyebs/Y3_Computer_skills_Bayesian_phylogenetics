@@ -40,3 +40,9 @@ if (!requireNamespace("treeio", quietly = TRUE)) BiocManager::install("treeio")
 source("https://bioconductor.org/biocLite.R")
 ## biocLite("BiocUpgrade") ## you may need this
 biocLite("ggtree")
+```
+```
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("ggtree")
