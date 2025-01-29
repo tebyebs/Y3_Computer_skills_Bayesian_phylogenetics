@@ -21,4 +21,6 @@ Y3_Computer_skills_Bayesian_phylogenetics/
 ## Script for running this repository
 Clone this repository to your local machine
 
-'''bash git clone git@github.com:BernardoGG/Y3_Computer_skills_Bayesian_phylogenetics.git
+```
+git clone git@github.com:BernardoGG/Y3_Computer_skills_Bayesian_phylogenetics.git
+```
