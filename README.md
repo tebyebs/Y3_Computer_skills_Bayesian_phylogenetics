@@ -35,3 +35,8 @@ remotes::install_github("YuLab-SMU/ggtree")
 if (!requireNamespace("ggtree", quietly = TRUE)) install.packages("ggtree", repos = "http://cran.us.r-project.org")
 if (!requireNamespace("treeio", quietly = TRUE)) BiocManager::install("treeio")
 ```
+```
+## try http:// if https:// URLs are not supported
+source("https://bioconductor.org/biocLite.R")
+## biocLite("BiocUpgrade") ## you may need this
+biocLite("ggtree")
