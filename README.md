@@ -24,5 +24,6 @@ Clone this repository to your local machine by accessing the console/terminal an
 ```
 git clone git@github.com:BernardoGG/Y3_Computer_skills_Bayesian_phylogenetics.git
 ```
+```
 install.packages("remotes")
 remotes::install_github("YuLab-SMU/ggtree")
