@@ -25,7 +25,7 @@ Clone this repository to your local machine by accessing the console/terminal an
 git clone git@github.com:BernardoGG/Y3_Computer_skills_Bayesian_phylogenetics.git
 ```
 ## Alternatives to installing ggtree
-Try running some of these liens of code
+Try running some of these lines of code:
 ```
 install.packages("remotes")
 remotes::install_github("YuLab-SMU/ggtree")
