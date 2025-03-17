@@ -1,0 +1,6 @@
+---
+title: "Computing Assignment – Bayesian phylogenetics and epidemiology"
+output:
+  pdf_document: default
+  html_document: default
+---

@@ -4,12 +4,13 @@ output:
   pdf_document: default
   html_document: default
 ---
-\vspace{-3em}
-January 2025 \  
 
-Convenor: Dr Bernardo Gutierrez [bernardo.gutierrez@biology.ox.ac.uk](mailto:bernardo.gutierrez@biology.ox.ac.uk) 
-\
-Demonstrator: Rhys Inward [rhys.inward@biology.ox.ac.uk](mailto:rhys.inward@biology.ox.ac.uk)
+\vspace{-3em}
+
+January 2025  
+
+Convenor: Dr Bernardo Gutierrez [bernardo.gutierrez\@biology.ox.ac.uk](mailto:bernardo.gutierrez@biology.ox.ac.uk)\
+Demonstrator: Rhys Inward [rhys.inward\@biology.ox.ac.uk](mailto:rhys.inward@biology.ox.ac.uk)
 
 \
 
@@ -17,13 +18,14 @@ Demonstrator: Rhys Inward [rhys.inward@biology.ox.ac.uk](mailto:rhys.inward@biol
 
 Infectious disease epidemiology has become increasingly reliant in the use of pathogen genetic data to understand how epidemics unfold and progress over space and time. One of the main tools used for this purpose is phylogenetics: the use of graphical representations of bifurcating processes (which we call phylogenetic trees, or just 'trees' for short) that show the evolutionary relationships between organisms. While phylogenetics emerged as a way to describe evolutionary relationships between different taxa (e.g., different plant or animal species over the course of thousands of years of biological evolution), the rapid evolutionary rate of some pathogens (mostly viruses) permits the use of the same approach to draw more recent evolutionary relationships that emerge within a single epidemic (over the course of weeks/months). As a virus spreads during an outbreak and accumulates genetic change during this time, we can take the genetic information from viruses within infected patients to infer trees that represent the history of the outbreak itself.
 
-This practical will focus on a specific type of method used to infer phylogenetic trees called Bayesian phylogenetics. Multiple specialised pieces of software exist that take the genetic data and infer trees, which can use different statistical approaches. We will focus on a program that uses Bayesian inference called **BEAST (Bayesian Evolutionary Analysis Sampling Trees)**, which is used routinely for viral genomic epidemiology. You can find excellent [online resources and tutorials on how to use BEAST](https://beast.community), so this practical will focus on processing, understanding and interpreting BEAST output. Since phylogenetics is a highly visual analytical approach, we will also focus on ways to visualise the data which can aid in interpreting and presenting results. You will learn how to work with R packages that process different data types (specifically to input data from both phylogenetic inference and from Bayesian inference in general) and that allow for the visualisation of this data in a comprehensive and accurate way. The data types themselves will be familiar to you, as they encompass either phylogenies or data frames. 
+This practical will focus on a specific type of method used to infer phylogenetic trees called Bayesian phylogenetics. Multiple specialised pieces of software exist that take the genetic data and infer trees, which can use different statistical approaches. We will focus on a program that uses Bayesian inference called **BEAST (Bayesian Evolutionary Analysis Sampling Trees)**, which is used routinely for viral genomic epidemiology. You can find excellent [online resources and tutorials on how to use BEAST](https://beast.community), so this practical will focus on processing, understanding and interpreting BEAST output. Since phylogenetics is a highly visual analytical approach, we will also focus on ways to visualise the data which can aid in interpreting and presenting results. You will learn how to work with R packages that process different data types (specifically to input data from both phylogenetic inference and from Bayesian inference in general) and that allow for the visualisation of this data in a comprehensive and accurate way. The data types themselves will be familiar to you, as they encompass either phylogenies or data frames.
 
-**Overview of the packages we'll use:** 
+**Overview of the packages we'll use:**
 
 ```{r packages}
 required_packages <-c("rmarkdown", "tinytex", "tidyverse", "ggtree",
 "ggridges", "treeio", "coda", "cols4all")
+
 ```
 
 **Importing phylogenetic trees**: While in a previous practical you used APE to upload and handle trees, we will use functions from two packages, ggtree and treeio, to import and visualise phylogenies here. In particular, ggtree is built as a visualisation tool (based on the popular ggplot package) and can be useful when looking at trees with large amounts of associated metadata.
@@ -51,7 +53,6 @@ if(length(missing_packages)) {
   install.packages(missing_packages)
 }
 
-# Load libraries
 lapply(required_packages, library, character.only = TRUE)
 ```
 
@@ -139,7 +140,7 @@ With this visualisation, it becomes much clearer which parts of the tree we shou
 You may have noticed that it is not only the tree tips which are coloured but rather branches and nodes. This type of reconstruction, where the locations of tree nodes (which are inferred ancestors to the sequences that branch out of these nodes) are inferred, is called phylogeography. Phylogeographic applications are common outside of genomic epidemiology, and in our case can provide information on the locations where viral lineages emerge and when these are introduced into new locations. This particular tree included a very simple method to infer the locations of the nodes called parsimony; more complex and statistically robust methods also exist and would be used during more systematic analyses. From this additional information, when is it likely that the Kassala outbreak started? How do you interpret the long branch at the base of the Kassala outbreak?
 
 \
-**3. IDENTIFYING NODES AND TRANSITIONS BETWEEN LOCATIONS** 
+**3. IDENTIFYING NODES AND TRANSITIONS BETWEEN LOCATIONS**
 
 Long branches in time-calibrated trees such as this can represent unobserved events from which no information is available concerning viral transmission. However, an important marker of a lineage of interest is the tree node which contains all the sequences of interest - in this case, all the sequences from the Kassala outbreak. These nodes are called Most Recent Common Ancestors (MRCAs). In genomic epidemiology, these are epidemiologically relevant because they can be used as a proxy for the earliest transmission event from which the descendant sequences emerged. Therefore, the MRCA inferred to have occurred within the same location as the rest of the sequences in an outbreak is an indicator of the time since the virus has likely been transmitting in our location of interest. For Kassala, it corresponds to this node.
 
@@ -214,7 +215,7 @@ The column names represent different parameters from the evolutionary model, and
 coda::traceplot(as.mcmc(beast_log$joint))
 ```
 
-The raw trace plot for the posterior probability shows that the early steps of our MCMC robot sampled values which were considerably low (LogL ~ -7000) compared to the values at later steps, when it settled around LogL ~ -2700. This behaviour is to be expected - remember that our robot starts in a somewhat random place on probability space, and slowly explores it until it arrives to what are ideally optimal values; once these values are attained, the robot is unlikely to leave this portion of probability space and will sample around the local optimum at very high densities. As we begin to exclude the first steps of the MCMC (i.e., remove the first steps), we get a better idea of the values that were sampled once the MCMC reached a stationary phase. Removing the first 10 000 steps of the MCMC produces this trace plot:
+The raw trace plot for the posterior probability shows that the early steps of our MCMC robot sampled values which were considerably low (LogL \~ -7000) compared to the values at later steps, when it settled around LogL \~ -2700. This behaviour is to be expected - remember that our robot starts in a somewhat random place on probability space, and slowly explores it until it arrives to what are ideally optimal values; once these values are attained, the robot is unlikely to leave this portion of probability space and will sample around the local optimum at very high densities. As we begin to exclude the first steps of the MCMC (i.e., remove the first steps), we get a better idea of the values that were sampled once the MCMC reached a stationary phase. Removing the first 10 000 steps of the MCMC produces this trace plot:
 
 ```{r}
 coda::traceplot(as.mcmc(beast_log$joint[10:nrow(beast_log)]))
