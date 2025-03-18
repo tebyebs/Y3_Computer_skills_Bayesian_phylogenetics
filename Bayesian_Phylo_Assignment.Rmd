@@ -44,4 +44,37 @@ ggtree(beast_tree, aes(color = outbreak), mrsd="2018-10-16") + theme_tree2() +
 #Scale bars are added, and the outbreaks are represented using colour-blind friendly visuals
 ```
 
-As you can see from the above graph, all the Kassala nodes are monophyletic and branch from the same individual MRCA which suggests that only one independent CHIKV introduction caused the 2018 outbreak. The estimated 
+As you can see from the above graph, all the Kassala nodes are monophyletic and branch from an individual MRCA that is inferred to have been within Kassala. This suggests that only one independent CHIKV introduction caused the 2018 outbreak. The estimated MRCA sets a limit for the most recent point at which the Kassala cases could have begun spreading, but there may have been earlier transmission events that attached to the tree at the long basal branch that were not sampled. Taking this into account, to estimate a more accurate date at which the Kassala outbreak began, we can use the posterior distribution of the "Age of Kassala Outbreak MRCA" parameter. 
+
+```{r}
+#Creating a data frame of the parameters with the burn-in removed
+beast_log <- read.csv("MCMC_log_files/CHIKV_IndianOcean_BEAST_output_log.csv")
+beast_log_burnin <- beast_log[floor(nrow(beast_log) * 0.1):nrow(beast_log),]
+
+
+#Generating a 95% HPD of the Kassala MRCA
+hpd <- paste0(round(HPDinterval(as.mcmc(beast_log_burnin$age.Kassala_outbreak.))[1], 2),
+              ", ",
+              round(HPDinterval(as.mcmc(beast_log_burnin$age.Kassala_outbreak.))[2], 2))
+
+beast_log_burnin |>
+  select(age.Kassala_outbreak.) |>
+  pivot_longer(cols = c("age.Kassala_outbreak."), names_to = "clade") |>
+  ggplot(aes(x = value, y = clade, fill = factor(stat(quantile)))) +
+  stat_density_ridges(geom = "density_ridges_gradient",
+                      calc_ecdf = TRUE,
+                      quantiles = c(0.025, 0.975),
+                      alpha = 0.2) +
+  scale_fill_manual(name = "Probability",
+                    values = c("#882255", "#88CCEE", "#882255"),
+                    labels = c("Lower 2.5% PD", "95% HPD", "Upper 2.5% PD")) +
+  scale_y_discrete(expand = expansion(add = c(.1, 2.5))) +
+  annotate("text", x = 2017, y = 2, label = hpd) +
+  theme_classic() + theme(axis.title.y = element_blank(),
+                          axis.text.y = element_blank(),
+                          axis.ticks.y = element_blank())
+```
+From this 95% HPD we can see that the estimated date of the Kassala MRCA is somewhere between April 2016 and May 2017, with January 2017 being the most probable point at which CHIKV began circulating (given the current set of sampled viral sequences). Of course, this is almost a year and a half before the current outbreak was identified. 
+july, outbreak, oct, samples taken
+spreading before sampling taken - since 2017? 
+someone may have been a long term asymptomatic carrier
