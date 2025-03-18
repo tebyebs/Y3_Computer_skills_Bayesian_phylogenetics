@@ -137,16 +137,11 @@ ggtree(updated_beast_tree, aes(color = outbreak), mrsd="2019-10-16") + theme_tre
 #Scale bars are updated to accommodate the more recent transmissions, and the outbreaks are represented using colour-blind friendly visuals
 ```
 
-As the updated tree shows, the 2019 cases are a mix of both a continuation of the 2018 Kassala lineage and also a separate new introduction. This can be seen by the fact that one sampled case branches out of the 2018 Kassala lineage, implying that it was a continuation. The remaining cases, however, form a sister clade to the 2018 outbreak, suggesting that this was a distinct introduction from India to Sudan. 
+As the updated tree shows, the 2019 cases are a mix of both a continuation of the 2018 Kassala lineage and also a separate new introduction. This can be seen by the fact that one sampled case branches out of the 2018 Kassala lineage, implying that it was a continuation. The remaining cases, however, form a sister clade to the 2018 outbreak, suggesting that this was a distinct introduction from India to Sudan.
 
 **Question 4**
 
-The updated log file contains parameter estimates for the MRCAs for the 2018
-(age(Kassala_2018)) and 2019 (age(Kassala_2019)) sequences. From a comparison
-of these dates and the specific times when cases started to increase for each season
-(July in 2018 and April in 2019), is there evidence for new CHIKV importations
-happening during the same time every year? Why? Are importation times related to
-the timing when epidemics start to take off?
+The updated log file contains parameter estimates for the MRCAs for the 2018 (age(Kassala_2018)) and 2019 (age(Kassala_2019)) sequences. From a comparison of these dates and the specific times when cases started to increase for each season (July in 2018 and April in 2019), is there evidence for new CHIKV importations happening during the same time every year? Why? Are importation times related to the timing when epidemics start to take off?
 
 ```{r}
 #Creating an updated data frame of the new parameters with the burn-in removed
@@ -162,10 +157,9 @@ updated_beast_log_burnin |>
   ggplot() + geom_violin(aes(x = value, y = clade_age)) +
   theme_classic()
 ```
-From the above graph, we can see that the MRCA for the 2019 outbreak is estimated to be between mid to late 2018, while the 2018 outbreak's MRCA is around early to mid 2017. It is interesting to note that the additional 2019 samples have changed the 2018 outbreak MRCA, presumably shifting this date forward in response to the later sample that branched out of the 2018 cases. This indicates THEY DO NOT START AT TEH SAME TIME ACH YEAR
 
-Comparing the estimated MRCAs of the two outbreaks with the point at which 
-see that there is a difference - one is faster
-importation times are linked - getting importation in winter/rainy season - more mosquitos - more spread
-getting in summer/dry season - less mosquitos - less spread - longer delay 
+From the above violin plot, we can see that the MRCA for the 2019 outbreak is estimated to be between mid to late 2018, while the 2018 outbreak's MRCA is around early to mid 2017. It is interesting to note that the additional 2019 samples have changed the 2018 outbreak MRCA, presumably shifting this date forward in response to the later sample that branched out of the 2018 cases. This indicates that the novel CHIKV importations do not occur at the same point each year - 2018 outbreak introduction occurred during the spring (of 2017) whereas the 2019 outbreak introduction was in the autumn of 2018.
 
+Comparing the estimated MRCAs of the two outbreaks with the point at which the cases start proliferating exponentially in the population, there is a clear difference: the 2019 outbreak took around 6-8 months to reach this stage, whereas the 2018 outbreak took more than a year. This is because the timing of the CHIKV introduction corresponds to the rate of its proliferation. For example, the time between the 2019 MRCA and outbreak is so short because it was introduced in the wet autumn, with significantly more mosquitos to increase spread. Conversely, the 2018 MRCA introduction in the dry spring would be spread slower, explaining the increased lag time.
+
+**Question 5**
