@@ -171,4 +171,24 @@ the tree object within R such as ‘label’, ‘isTip’, ‘country’ and ‘
 questions. Consider that plots like histograms and time series can be useful to explore
 these questions.
 
-beast_tree@data[["country"]][["country5"]]
+
+```{r}
+beast_tree@data
+
+beast_tree_data <- fortify(beast_tree)
+
+
+# Count node locations by country
+location_counts <- beast_tree_data %>%
+  filter(!is.na(country)) %>%  # Remove NA values
+  count(country, name = "count") %>%
+  arrange(desc(count))
+
+ggplot(location_counts, aes(x = reorder(country, -count), y = count, fill = country)) +
+  geom_bar(stat = "identity") +
+  theme_classic() +
+  labs(x = "Country", y = "Node Count", title = "Node Counts by Country") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
