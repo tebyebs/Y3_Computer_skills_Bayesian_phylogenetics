@@ -163,3 +163,12 @@ From the above violin plot, we can see that the MRCA for the 2019 outbreak is es
 Comparing the estimated MRCAs of the two outbreaks with the point at which the cases start proliferating exponentially in the population, there is a clear difference: the 2019 outbreak took around 6-8 months to reach this stage, whereas the 2018 outbreak took more than a year. This is because the timing of the CHIKV introduction corresponds to the rate of its proliferation. For example, the time between the 2019 MRCA and outbreak is so short because it was introduced in the wet autumn, with significantly more mosquitos to increase spread. Conversely, the 2018 MRCA introduction in the dry spring would be spread slower, explaining the increased lag time.
 
 **Question 5**
+
+Explore the imported BEAST tree (beast_tree) object and extract the counts of node
+locations by country. Through which country or countries has this CHIKV lineage
+circulated more frequently? Have these trends changed over time? Use attributes of
+the tree object within R such as ‘label’, ‘isTip’, ‘country’ and ‘height’ to answer these
+questions. Consider that plots like histograms and time series can be useful to explore
+these questions.
+
+beast_tree@data[["country"]][["country5"]]
