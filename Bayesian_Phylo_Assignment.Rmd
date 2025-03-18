@@ -44,7 +44,7 @@ ggtree(beast_tree, aes(color = outbreak), mrsd="2018-10-16") + theme_tree2() +
 #Scale bars are added, and the outbreaks are represented using colour-blind friendly visuals
 ```
 
-As you can see from the above graph, all the Kassala nodes are monophyletic and branch from an individual MRCA that is inferred to have been within Kassala. This suggests that only one independent CHIKV introduction caused the 2018 outbreak. The estimated MRCA sets a limit for the most recent point at which the Kassala cases could have begun spreading, but there may have been earlier transmission events that attached to the tree at the long basal branch that were not sampled. Taking this into account, to estimate a more accurate date at which the Kassala outbreak began, we can use the posterior distribution of the "Age of Kassala Outbreak MRCA" parameter. 
+As you can see from the above graph, all the Kassala nodes are monophyletic and branch from an individual MRCA that is inferred to have been located within Kassala. This suggests that only one independent CHIKV introduction caused the 2018 outbreak, most likely an long term carrier, possibly asymptomatic, that had traveled to Sudan. The estimated MRCA sets a limit for the most recent point at which the Kassala cases could have begun spreading, but there may have been earlier transmission events that attached to the tree at the long basal branch that were not sampled. Taking this into account, to estimate a more accurate date at which the Kassala outbreak began, we can use the posterior distribution of the "Age of Kassala Outbreak MRCA" parameter.
 
 ```{r}
 #Creating a data frame of the parameters with the burn-in removed
@@ -74,7 +74,55 @@ beast_log_burnin |>
                           axis.text.y = element_blank(),
                           axis.ticks.y = element_blank())
 ```
-From this 95% HPD we can see that the estimated date of the Kassala MRCA is somewhere between April 2016 and May 2017, with January 2017 being the most probable point at which CHIKV began circulating (given the current set of sampled viral sequences). Of course, this is almost a year and a half before the current outbreak was identified. 
-july, outbreak, oct, samples taken
-spreading before sampling taken - since 2017? 
-someone may have been a long term asymptomatic carrier
+
+From this 95% HPD we can see that the estimated date of the Kassala MRCA is somewhere between April 2016 and May 2017, with January 2017 being the most probable point at which CHIKV began circulating (given the current set of sampled viral sequences). Of course, this is almost a year before the MRCA estimate from the tree above (around the start of 2018), suggesting that there were in fact transmission events occurring earlier that weren't sampled.
+
+**Question 2**
+
+Provide a description of the circulation of the entire CHIKV Indian Ocean-specific lineage from this exercise from the early 2000s to 2018. Include viral movements across countries and regions, and approximate dates when these viral movements occurred.
+
+```{r}
+# Spread across regions 
+ggtree(beast_tree, aes(color = region), mrsd = "2018-10-16") + theme_tree2() +
+  scale_x_continuous(
+    breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+    minor_breaks = seq(2004, 2019, 1)
+  ) +
+  scale_color_discrete_c4a_cat("friendly7") +
+  theme(
+    panel.grid.major = element_line(color = "black", size = .1),
+    panel.grid.minor = element_line(color = "grey", size = .1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank()
+  )
+```
+
+The above graph shows the spread of the Indian Ocean CHIKV lineage across regions. Using this, and the below graph showing spread to individual countries, we can build a picture of the spread of the virus. As the name implies, this lineage originally started spreading as an epidemic around 2005 in the islands of La Reunion and Comoros, and was a sub-lineage of the earlier Asian CHIKV genotype. The original transmission origin for this outbreak is hard to infer, but from the below graph we can see it must have been somewhere between these islands and mainland Africa in Kenya. The increased severity of this outbreak has been attributed to a mutation that allowed the virus to acquire additional mosquito species as vectors and expand beyond its native range (Schuffenecker et al, 2006). The virus then continued to spread around the Indian ocean islands, including to Mauritius, Mayotte and the Seychelles around late 2006. While this epidemic subsided, an outbreak began spreading in India around 2007/8, spreading to neighboring Sri Lanka towards the end of 2008 and even into South East Asia with cases reported in Singapore around 2009. The virus continually subsided and re-emerged within India from 2009 till as late as 2016, spreading to Bangladesh in 2012 and Yemen in 2011, and this Indian re-emergence eventually led to cases in Kenya again in 2017. Simultaneously, another Indian strain led to outbreaks in Pakistan in 2016. The origin of the Sudan 2018 epidemic is also thought to have originated from an Indian infection, spreading to Kassala in early 2018.
+
+```{r}
+ggtree(beast_tree, aes(color = country), mrsd="2018-10-16") + theme_tree2() +
+  scale_x_continuous(breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
+                     minor_breaks = seq(2004, 2019, 1)) +
+  scale_color_discrete_c4a_cat("classic20") +
+  theme(panel.grid.major = element_line(color = "black", size = .1),
+        panel.grid.minor = element_line(color = "grey", size = .1),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+References for this question:
+
+Schuffenecker, I., Iteman, I., Michault, A., Murri, S., Frangeul, L., Vaney, M.-C., Lavenir, R., Pardigon, N., Reynes, J.-M., Pettinelli, F., Biscornet, L., Diancourt, L., Michel, S., Duquerroy, S., Guigon, G., Frenkiel, M.-P., Bréhin, A.-C., Cubito, N., Desprès, P. and Kunst, F. (2006). Genome Microevolution of Chikungunya Viruses Causing the Indian Ocean Outbreak. PLoS Medicine, 3(7), p.e263. <doi:https://doi.org/10.1371/journal.pmed.0030263>.
+
+
+**Question 3**
+
+Imagine a fictitious scenario where, following the 2018 outbreak, CHIKV infections
+continued to be reported in Kassala throughout 2019. We have expanded the original
+data set to include 7 new CHIKV genome sequences (please note that, since this
+scenario is fictitious, the 2019 Kassala sequences are synthetic and created for the
+purpose of this exercise). A similar analysis to the 2018 outbreak was performed, the
+resulting tree can be found in the MCC_CHIKV_IndianOcean_updated.tree file and
+the log file can be found as CHIKV_IndianOcean_updated_BEAST_output_log.csv.
+Are the 2019 cases a continuation of the 2018 epidemic or a different outbreak?
+Justify your answer with a visualisation of the tree and its interpretation.
