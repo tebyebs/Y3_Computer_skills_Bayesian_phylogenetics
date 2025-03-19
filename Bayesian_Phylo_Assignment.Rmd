@@ -155,6 +155,7 @@ updated_beast_log_burnin |>
   select(age.Kassala_2019., age.Kassala_2018.) |>
   pivot_longer(cols = c("age.Kassala_2019.", "age.Kassala_2018."), names_to = "clade_age") |>
   ggplot() + geom_violin(aes(x = value, y = clade_age)) +
+  labs(x = "Year", y = "Outbreak", title = "Comparison between 2018 & 2019 Outbreak") +
   theme_classic()
 ```
 
@@ -171,24 +172,42 @@ the tree object within R such as ‘label’, ‘isTip’, ‘country’ and ‘
 questions. Consider that plots like histograms and time series can be useful to explore
 these questions.
 
-
-```{r}
-beast_tree@data
-
+```{r, warning=F}
+#Converting the tree data into a dataframe
 beast_tree_data <- fortify(beast_tree)
-
 
 # Count node locations by country
 location_counts <- beast_tree_data %>%
   filter(!is.na(country)) %>%  # Remove NA values
-  count(country, name = "count") %>%
-  arrange(desc(count))
+  count(country, name = "count") 
+```
 
+```{r}
+#Plotting a bar chart of the node locations
 ggplot(location_counts, aes(x = reorder(country, -count), y = count, fill = country)) +
   geom_bar(stat = "identity") +
   theme_classic() +
   labs(x = "Country", y = "Node Count", title = "Node Counts by Country") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        legend.position = "none")
 ```
+The above graph shows that Kassala has the largest number of nodes, followed by India and Sri Lanka. This, however, is probably sampling bias due to the fact that the majority of the samples used to form the tree were from Kassala, whereas in the other locations far fewer samples were used as a reference. Therefore, it is likely that India and Sri Lanka are the countries through which the largest outbreaks of this CHIKV lineage have occured, which is supported by the data - 1.25 million suspected cases from the 2006 outbreak alone (Muniaraj, 2014). Similarly, La Reunion is next in line and this also would be expected due to the size of the 2005 outbreak, with almost a third of the island population becoming infected (Roth et al, 2014). The next countries along are those that are peripheral to the countries with major epidemics, such as Comoros or Pakistan and Bangladesh, probably due to spillover events from the epidemic. 
+
+The below graph shows how the cases have varied over time across the different countries. As expected, the intial countries with cases were those in the Indian Ocean. Over time, importations to South East Asia and the Indian subcontinent lead to the establishment of outbreaks there, whilst the Indian ocean cases subsided. The cases in India spread to neighbouring Pakistan and Bangladesh, as well as Yemen, before finally reaching African again with epidemics in Kenya and Kassala. 
+
+
+```{r}
+beast_tree_data |>
+  ggplot(aes(x = country, y = as.numeric(height))) +
+  geom_boxplot() +
+  theme_classic() +
+  labs(x = "Country", y = "Years since 2018", title = "Change in Cases over Time") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+References:
+
+Muniaraj M. Fading chikungunya fever from India: beginning of the end of another episode? Indian J Med Res. 2014 Mar;139(3):468-70. PMID: 24820844; PMCID: PMC4069744.
+
+Roth, A., Hoy, D., Horwood, P.F., Ropa, B., Hancock, T., Guillaumot, L., Rickart, K., Frison, P., Pavlin, B. and Souares, Y. (2014). Preparedness for Threat of Chikungunya in the Pacific. Emerging Infectious Diseases, 20(8). doi:https://doi.org/10.3201/eid2008.130696.
+
 
