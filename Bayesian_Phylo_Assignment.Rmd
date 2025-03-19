@@ -198,6 +198,7 @@ The below graph shows how the cases have varied over time across the different c
 
 
 ```{r}
+# Plotting the data as a boxplot time series
 beast_tree_data |>
   ggplot(aes(x = country, y = as.numeric(height))) +
   geom_boxplot() +
