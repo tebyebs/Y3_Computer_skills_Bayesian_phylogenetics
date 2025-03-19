@@ -5,7 +5,7 @@ output:
   pdf_document: default
 ---
 
-```{r setup, message=FALSE, warning=FALSE, results='hide'}
+```{r setup, echo = F, message=FALSE, warning=FALSE, results='hide'}
 # List of required packages
 required_packages <- c(
   "rmarkdown", "tinytex", "tidyverse", "ggtree", 
@@ -26,7 +26,7 @@ Candidate Number: 1073601
 
 From the trees produced in the R Markdown file propose how many independent CHIKV introductions into Kassala sparked and sustained the 2018 outbreak, and their time of occurrence. How much earlier from the onset of the current outbreak is this estimated to be, and what does this imply? Use tree visualisations and the distribution of relevant parameter estimates to explain your answer.
 
-```{r}
+```{r echo=FALSE}
 # Load the MCC tree
 beast_file <- ("MCC_trees/MCC_CHIKV_IndianOcean.tree")
 beast_tree <- treeio::read.beast(beast_file)
@@ -46,7 +46,7 @@ ggtree(beast_tree, aes(color = outbreak), mrsd="2018-10-16") + theme_tree2() +
 
 As you can see from the above graph, all the Kassala nodes are monophyletic and branch from an individual MRCA that is inferred to have been located within Kassala. This suggests that only one independent CHIKV introduction caused the 2018 outbreak, most likely an long term carrier, possibly asymptomatic, that had traveled to Sudan. The estimated MRCA sets a limit for the most recent point at which the Kassala cases could have begun spreading, but there may have been earlier transmission events that attached to the tree at the long basal branch that were not sampled. Taking this into account, to estimate a more accurate date at which the Kassala outbreak began, we can use the posterior distribution of the "Age of Kassala Outbreak MRCA" parameter.
 
-```{r}
+```{r echo=FALSE, message= F}
 #Creating a data frame of the parameters with the burn-in removed
 beast_log <- read.csv("MCMC_log_files/CHIKV_IndianOcean_BEAST_output_log.csv")
 beast_log_burnin <- beast_log[floor(nrow(beast_log) * 0.1):nrow(beast_log),]
@@ -81,7 +81,7 @@ From this 95% HPD we can see that the estimated date of the Kassala MRCA is some
 
 Provide a description of the circulation of the entire CHIKV Indian Ocean-specific lineage from this exercise from the early 2000s to 2018. Include viral movements across countries and regions, and approximate dates when these viral movements occurred.
 
-```{r}
+```{r warning=F, echo = F}
 # Spread across regions 
 ggtree(beast_tree, aes(color = region), mrsd = "2018-10-16") + theme_tree2() +
   scale_x_continuous(
@@ -101,7 +101,7 @@ The above graph shows the spread of the Indian Ocean CHIKV lineage across region
 
 The virus then continued to spread around the Indian ocean islands, including to Mauritius, Mayotte and the Seychelles around late 2006. While this epidemic subsided, an outbreak began spreading in India around 2007/8, spreading to neighboring Sri Lanka towards the end of 2008 and even into South East Asia with cases reported in Singapore around 2009. The virus continually subsided and re-emerged within India from 2009 till as late as 2016, spreading to Bangladesh in 2012 and Yemen in 2011, and this Indian re-emergence eventually led to cases in Kenya in 2017. Simultaneously, another Indian strain led to outbreaks in Pakistan in 2016. The origin of the Sudan 2018 epidemic is also thought to have originated from an Indian infection, spreading to Kassala in early 2018.
 
-```{r}
+```{r echo = F}
 ggtree(beast_tree, aes(color = country), mrsd="2018-10-16") + theme_tree2() +
   scale_x_continuous(breaks = c(2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016, 2018),
                      minor_breaks = seq(2004, 2019, 1)) +
@@ -120,7 +120,7 @@ Schuffenecker, I., Iteman, I., Michault, A., Murri, S., Frangeul, L., Vaney, M.-
 
 Imagine a fictitious scenario where, following the 2018 outbreak, CHIKV infections continued to be reported in Kassala throughout 2019. We have expanded the original data set to include 7 new CHIKV genome sequences (please note that, since this scenario is fictitious, the 2019 Kassala sequences are synthetic and created for the purpose of this exercise). A similar analysis to the 2018 outbreak was performed, the resulting tree can be found in the MCC_CHIKV_IndianOcean_updated.tree file and the log file can be found as CHIKV_IndianOcean_updated_BEAST_output_log.csv. Are the 2019 cases a continuation of the 2018 epidemic or a different outbreak? Justify your answer with a visualisation of the tree and its interpretation.
 
-```{r, warning=F}
+```{r, warning=F, message = F}
 # Loading the updated tree
 updated_beast_file <- ("MCC_trees/MCC_CHIKV_IndianOcean_updated.tree")
 updated_beast_tree <- treeio::read.beast(updated_beast_file)
@@ -172,7 +172,7 @@ the tree object within R such as ‘label’, ‘isTip’, ‘country’ and ‘
 questions. Consider that plots like histograms and time series can be useful to explore
 these questions.
 
-```{r, warning=F}
+```{r, warning=F, message= F}
 #Converting the tree data into a dataframe
 beast_tree_data <- fortify(beast_tree)
 
@@ -191,6 +191,7 @@ ggplot(location_counts, aes(x = reorder(country, -count), y = count, fill = coun
   theme(axis.text.x = element_text(angle = 45, hjust = 1), 
         legend.position = "none")
 ```
+
 The above graph shows that Kassala has the largest number of nodes, followed by India and Sri Lanka. This, however, is probably sampling bias due to the fact that the majority of the samples used to form the tree were from Kassala, whereas in the other locations far fewer samples were used as a reference. Therefore, it is likely that India and Sri Lanka are the countries through which the largest outbreaks of this CHIKV lineage have occured, which is supported by the data - 1.25 million suspected cases from the 2006 outbreak alone (Muniaraj, 2014). Similarly, La Reunion is next in line and this also would be expected due to the size of the 2005 outbreak, with almost a third of the island population becoming infected (Roth et al, 2014). The next countries along are those that are peripheral to the countries with major epidemics, such as Comoros or Pakistan and Bangladesh, probably due to spillover events from the epidemic. 
 
 The below graph shows how the cases have varied over time across the different countries. As expected, the intial countries with cases were those in the Indian Ocean. Over time, importations to South East Asia and the Indian subcontinent lead to the establishment of outbreaks there, whilst the Indian ocean cases subsided. The cases in India spread to neighbouring Pakistan and Bangladesh, as well as Yemen, before finally reaching African again with epidemics in Kenya and Kassala. 
@@ -204,6 +205,7 @@ beast_tree_data |>
   labs(x = "Country", y = "Years since 2018", title = "Change in Cases over Time") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
 References:
 
 Muniaraj M. Fading chikungunya fever from India: beginning of the end of another episode? Indian J Med Res. 2014 Mar;139(3):468-70. PMID: 24820844; PMCID: PMC4069744.
